@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Maps API for JavaScript</title>
+    <meta name="viewport" content="initial-scale=1, width=device-width" />
+    <link rel="stylesheet" type="text/css" href="https://js.cit.api.here.com/v3/3.0/mapsjs-ui.css?dp-version=1526040296" />
+    <script src="https://js.cit.api.here.com/v3/3.0/mapsjs-core.js" type="text/javascript" charset="utf-8"></script>
+    <script src="https://js.cit.api.here.com/v3/3.0/mapsjs-service.js" type="text/javascript" charset="utf-8"></script>
+    <!-- for interactive map  -->
+    <script src="https://js.cit.api.here.com/v3/3.0/mapsjs-mapevents.js" type="text/javascript" charset="utf-8"></script>
+    <!-- for StreetLevel -->
+    <script src="https://js.cit.api.here.com/v3/3.0/mapsjs-pano.js" type="text/javascript" charset="utf-8"></script>
+    <script type="text/javascript" src="https://js.cit.api.here.com/v3/3.0/mapsjs-ui.js"></script>
+</head>
+
+<body>
+    <div id='maps' style="width: 100%;height:850px;initial-scale=0.5"></div>
+    <script type="text/javascript" charset="utf-8">
+    //set function to request the map tile API to be able change the language or others.  
+    function switchMapLanguage(map, platform) {
+        var mapTileService = platform.getMapTileService({
+                type: 'base'
+            }),
+            // Our layer will load tiles from the HERE Map Tile API
+
+            //mapTile type : normal.day, normal.day.grey, normal.day.transit, normal.day.custom, normal.night, normal.night.grey, terrain.day, satellite.day, hybrid.day, pedestrian.day, pedestrian.night, carnav.day.grey, and reduced.day.
+
+            chineseMapLayer = mapTileService.createTileLayer(
+                'maptile',
+                'normal.day',
+                '512',
+                'png8',  { lg: 'CHT' ,lg2: "ENG", ppi:'250', pview:'PAK'}
+                //{ lg: 'CHT', lg2: 'ENG', pois:'123456789101112131415161718192021222324252627282930', ppi:'250'}
+                
+            );
+        map.setBaseLayer(chineseMapLayer);
+
+        // Display default UI components on the map and change default
+        // language to simplified Chinese.
+        // Besides supported language codes you can also specify your custom translation
+        // using H.ui.i18n.Localization.
+        var ui = H.ui.UI.createDefault(map, defaultLayers, 'zh-CN');
+		ui.getControl('zoom').setDisabled(true)
+		//ui.getControl('zoom').setDisabled(false)
+
+        // Remove not needed settings control
+        //ui.removeControl('mapsettings');
+    }
+
+
+
+    var platform = new H.service.Platform({
+        'app_id': 'inMaDeyec4Eyevupache',
+        'app_code': '-T00kPbHqMe2-6e94f-Grw',
+		'useHTTPS' : true,
+		//'useCIT': false,
+
+    });
+
+
+
+    // Obtain the default map types from the platform object:
+    var defaultLayers = platform.createDefaultLayers();
+    // Instantiate (and display) a map object:
+    var map = new H.Map(
+        document.getElementById('maps'),
+        /*(定義基本的呈現) default the lays*/
+        defaultLayers.normal.map, {
+            zoom: 15,
+            center: {
+                lat: 34.05548, 
+                lng: 76.39407
+            }
+        });
+
+    //使地圖能pan / drag ; create the listener for map interactive
+    // Enable the event system on the map instance:
+    var mapEvents = new H.mapevents.MapEvents(map);
+    // Add event listener:
+    map.addEventListener('tap', function(evt) {
+        // Log 'tap' and 'mouse' events:
+        console.log(evt.type, evt.currentPointer.type);
+    });
+
+    // Instantiate the default behavior, providing the mapEvents object: 
+    var behavior = new H.mapevents.Behavior(mapEvents);
+
+
+
+    /*.setBaseLayer() -> change the lays (設定layer的呈現)
+      - normal / satellite / terrain ; 
+      - map / traffic / panorama / transit / xbase / base / labels ; 
+      - incidents / venues
+    */
+    //map.setBaseLayer(defaultLayers.terrain.map);
+
+    //call switchMapLanguage() to change the language
+    switchMapLanguage(map, platform);
+
+    /* 
+    //呼叫maptile API 展現alps 或 fleet的圖層
+    // Create a MapTileService instance to request base tiles (i.e. 
+    // base.map.api.here.com): alps or fleet
+    var mapTileService = platform.getMapTileService({ 'type': 'base' });
+
+    // Create a tile layer which requests map tiles with an additional 'style'
+    // URL parameter set to 'fleet':
+    var fleetStyleLayer = mapTileService.createTileLayer(
+        'maptile',
+        'normal.day',
+        256,
+        'png8', { 'style': 'fleet' });
+
+    // Set the new fleet style layer as a base layer on the map:
+    map.setBaseLayer(fleetStyleLayer); 
+    */
+
+
+    //Add Marker 點圖標, provide two type Normal or DOM
+    var taipei101Marker = new H.map.Marker({
+        lat: 25.0339,
+        lng: 121.5647
+    });
+    map.addObject(taipei101Marker);
+
+    //add svg Icon for Maker
+    var svgMarkup = '<svg width="30" height="18" ' +
+        'xmlns="http://www.w3.org/2000/svg">' +
+        '<rect stroke="white" fill="#1b468d" x="1" y="1" width="30" ' +
+        'height="18" /><text x="16" y="15" font-size="8pt" ' +
+        'font-family="Arial" font-weight="bold" text-anchor="middle" ' +
+        'fill="white">HERE</text></svg>';
+
+    var icons = new H.map.Icon(svgMarkup),
+        coords = { lat: 25.03689, lng: 121.56848 },
+        hereTaipeiMarker = new H.map.Marker(
+            coords, { icon: icons });
+    map.addObject(hereTaipeiMarker);
+
+
+    //add svg Icon for web source
+    var svgMarkup = '<svg width="32" height="32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><image width="32" height="32" overflow="visible" xlink:href="data:image/svg+xml;utf8;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iaXNvLTg4NTktMSI/Pgo8IS0tIEdlbmVyYXRvcjogQWRvYmUgSWxsdXN0cmF0b3IgMTkuMC4wLCBTVkcgRXhwb3J0IFBsdWctSW4gLiBTVkcgVmVyc2lvbjogNi4wMCBCdWlsZCAwKSAgLS0+CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmVyc2lvbj0iMS4xIiBpZD0iQ2FwYV8xIiB4PSIwcHgiIHk9IjBweCIgdmlld0JveD0iMCAwIDQ3MCA0NzAiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDQ3MCA0NzA7IiB4bWw6c3BhY2U9InByZXNlcnZlIiB3aWR0aD0iNTEycHgiIGhlaWdodD0iNTEycHgiPgo8Zz4KCTxwYXRoIHN0eWxlPSJmaWxsOiNGRkZGRkY7IiBkPSJNMzE1LjM5MywzMTIuNzVjLTIxLjg4LTExLjc5My00Ni42Mi0xOC45MzEtNzIuODkzLTIwLjA3N1YzMTVjMCw0LjE0My0zLjM1OCw3LjUtNy41LDcuNSAgIHMtNy41LTMuMzU3LTcuNS03LjV2LTIyLjMyN2MtMjYuMjcyLDEuMTQ2LTUxLjAxMyw4LjI4NC03Mi44OTMsMjAuMDc3bDcyLjg5Myw3Mi44OTRWMzQ1YzAtNC4xNDMsMy4zNTgtNy41LDcuNS03LjUgICBzNy41LDMuMzU3LDcuNSw3LjV2NDAuNjQ0TDMxNS4zOTMsMzEyLjc1eiIvPgoJPHBhdGggc3R5bGU9ImZpbGw6I0YyRUJEOTsiIGQ9Ik0xNTMuNzUsMTU2LjI1YzAsNDQuODAyLDM2LjQ0OSw4MS4yNSw4MS4yNSw4MS4yNXM4MS4yNS0zNi40NDgsODEuMjUtODEuMjUgICBjMC04LjQxNi0xLjI4NC0xNi40NjQtMy44OTEtMjQuNTE0Yy05LjEwOC00LjUzOS0xOS4zNjUtNi45MzMtMjkuODUtNi45MzNjLTE1LjU2MywwLTMwLjczMiw1LjQ5LTQyLjcxMiwxNS40NTkgICBjLTEuMzksMS4xNTYtMy4wOTQsMS43MzQtNC43OTcsMS43MzRzLTMuNDA3LTAuNTc4LTQuNzk3LTEuNzM0Yy0xMS45NzktOS45NjktMjcuMTQ4LTE1LjQ1OS00Mi43MTItMTUuNDU5ICAgYy0xMC40ODUsMC0yMC43NDIsMi4zOTUtMjkuODUsNi45MzNDMTU1LjAzNCwxMzkuNzg2LDE1My43NSwxNDcuODM0LDE1My43NSwxNTYuMjV6Ii8+Cgk8cGF0aCBzdHlsZT0iZmlsbDojRkZDQzc1OyIgZD0iTTEzOS4yNDksMzA0LjI1OEMxNjcuMTk5LDI4Ny4yODMsMTk5Ljk3OCwyNzcuNSwyMzUsMjc3LjVzNjcuODAxLDkuNzgzLDk1Ljc1MSwyNi43NTggICBjMC42MDIsMC4yNzIsMS4xNzcsMC42MjIsMS43MDQsMS4wNjFjNy40NjksNC42NDgsMTQuNTg0LDkuODExLDIxLjI5NSwxNS40NDNWMjgyLjVjLTQuMTQyLDAtNy41LTMuMzU3LTcuNS03LjVWMTU2LjI1ICAgYzAtMjMuMjc2LTcuMDktNDUuNDMtMjAuMjUtNjQuMDM3djMzLjA0NWMzLjUxOCwxMC4xNzUsNS4yNSwyMC4zMjksNS4yNSwzMC45OTJjMCw1My4wNzItNDMuMTc4LDk2LjI1LTk2LjI1LDk2LjI1ICAgcy05Ni4yNS00My4xNzgtOTYuMjUtOTYuMjVjMC0xMC42NjMsMS43MzItMjAuODE3LDUuMjUtMzAuOTkyVjkyLjIxM2MtMTMuMTYsMTguNjA2LTIwLjI1LDQwLjc2LTIwLjI1LDY0LjAzN1YyNzUgICBjMCw0LjE0My0zLjM1OCw3LjUtNy41LDcuNXYzOC4yNjNjNi43MTEtNS42MzIsMTMuODI2LTEwLjc5NSwyMS4yOTUtMTUuNDQzQzEzOC4wNzMsMzA0Ljg4LDEzOC42NDcsMzA0LjUzLDEzOS4yNDksMzA0LjI1OHoiLz4KCTxwYXRoIHN0eWxlPSJmaWxsOiM2REE4RDY7IiBkPSJNMTU5LDExNC44MzRjOS4wMTMtMy4zMTEsMTguNjgtNS4wMzEsMjguNDkxLTUuMDMxYzE3LjA0LDAsMzMuNjksNS4zNzEsNDcuNTA5LDE1LjIyOSAgIGMxMy44MTktOS44NTgsMzAuNDctMTUuMjI5LDQ3LjUwOS0xNS4yMjljOS44MTEsMCwxOS40NzgsMS43MjEsMjguNDkxLDUuMDMxVjQ3LjVjMC00LjE0MywzLjM1OC03LjUsNy41LTcuNVYyNUgxNTlWMTE0LjgzNHoiLz4KCTxwYXRoIHN0eWxlPSJmaWxsOiMwODI5NDc7IiBkPSJNMTIzLjc1LDI3NVYxNTYuMjVjMC0yMy4yNzYsNy4wOS00NS40MywyMC4yNS02NC4wMzd2MzMuMDQ1Yy0zLjUxOCwxMC4xNzUtNS4yNSwyMC4zMjktNS4yNSwzMC45OTIgICBjMCw1My4wNzIsNDMuMTc4LDk2LjI1LDk2LjI1LDk2LjI1czk2LjI1LTQzLjE3OCw5Ni4yNS05Ni4yNWMwLTEwLjY2My0xLjczMi0yMC44MTctNS4yNS0zMC45OTJWOTIuMjEzICAgYzEzLjE2LDE4LjYwNiwyMC4yNSw0MC43NiwyMC4yNSw2NC4wMzdWMjc1YzAsNC4xNDMsMy4zNTgsNy41LDcuNSw3LjVzNy41LTMuMzU3LDcuNS03LjVWMTU2LjI1ICAgYzAtMzIuOTIxLTEyLjQ5My02My44Ny0zNS4yNS04Ny41MDNWNDcuNWMwLTQuMTQzLTMuMzU4LTcuNS03LjUtNy41cy03LjUsMy4zNTctNy41LDcuNXY2Ny4zMzQgICBjLTkuMDEzLTMuMzExLTE4LjY4LTUuMDMxLTI4LjQ5MS01LjAzMWMtMTcuMDQsMC0zMy42OSw1LjM3MS00Ny41MDksMTUuMjI5Yy0xMy44MTktOS44NTgtMzAuNDctMTUuMjI5LTQ3LjUwOS0xNS4yMjkgICBjLTkuODExLDAtMTkuNDc4LDEuNzIxLTI4LjQ5MSw1LjAzMVYyNWgyMjZ2MTI5Ljc1OGwtMTAuOTEsMjYuMzM5Yy0xLjU4NSwzLjgyNywwLjIzMiw4LjIxNCw0LjA1OSw5Ljc5OSAgIGMzLjgyOCwxLjU4OCw4LjIxNC0wLjIzMiw5Ljc5OS00LjA1OWw0LjU1MS0xMC45ODhsNC41NTEsMTAuOTg4YzEuMTk2LDIuODg5LDMuOTg5LDQuNjMyLDYuOTMyLDQuNjMyICAgYzAuOTU3LDAsMS45MjktMC4xODUsMi44NjctMC41NzNjMy44MjctMS41ODUsNS42NDQtNS45NzIsNC4wNTktOS43OTlMNDAwLDE1NC43NThWMjVoMTIuNWM0LjE0MiwwLDcuNS0zLjM1Nyw3LjUtNy41ICAgcy0zLjM1OC03LjUtNy41LTcuNUg0MDBWNy41YzAtNC4xNDMtMy4zNTgtNy41LTcuNS03LjVTMzg1LDMuMzU3LDM4NSw3LjVWMTBINTcuNWMtNC4xNDIsMC03LjUsMy4zNTctNy41LDcuNXMzLjM1OCw3LjUsNy41LDcuNSAgIEgxNDR2NDMuNzQ3Yy0yMi43NTcsMjMuNjMzLTM1LjI1LDU0LjU4Mi0zNS4yNSw4Ny41MDNWMjc1YzAsNC4xNDMsMy4zNTgsNy41LDcuNSw3LjVTMTIzLjc1LDI3OS4xNDMsMTIzLjc1LDI3NXogTTE4Ny40OTEsMTI0LjgwMyAgIGMxNS41NjMsMCwzMC43MzIsNS40OSw0Mi43MTIsMTUuNDU5YzEuMzksMS4xNTYsMy4wOTQsMS43MzQsNC43OTcsMS43MzRzMy40MDctMC41NzgsNC43OTctMS43MzQgICBjMTEuOTc5LTkuOTY5LDI3LjE0OC0xNS40NTksNDIuNzEyLTE1LjQ1OWMxMC40ODUsMCwyMC43NDIsMi4zOTUsMjkuODUsNi45MzNjMi42MDcsOC4wNSwzLjg5MSwxNi4wOTksMy44OTEsMjQuNTE0ICAgYzAsNDQuODAyLTM2LjQ0OSw4MS4yNS04MS4yNSw4MS4yNXMtODEuMjUtMzYuNDQ4LTgxLjI1LTgxLjI1YzAtOC40MTYsMS4yODQtMTYuNDY0LDMuODkxLTI0LjUxNCAgIEMxNjYuNzQ5LDEyNy4xOTcsMTc3LjAwNiwxMjQuODAzLDE4Ny40OTEsMTI0LjgwM3oiLz4KCTxwYXRoIHN0eWxlPSJmaWxsOiMxODVGOEQ7IiBkPSJNMTM3LjUsNDU1aDI2Ny4zMzdjLTIuNDQ0LTU2LjA1MS0zMi4xNjMtMTA1LjEzNi03Ni4xNzctMTM0LjMwM2wtODguMzU2LDg4LjM1NyAgIGMtMC4wMTgsMC4wMTgtMC4wMzgsMC4wMzMtMC4wNTcsMC4wNTFjLTAuMTU2LDAuMTUzLTAuMzE3LDAuMzAxLTAuNDg2LDAuNDRjLTAuMDU0LDAuMDQ0LTAuMTEyLDAuMDgyLTAuMTY3LDAuMTI1ICAgYy0wLjEzOSwwLjEwNy0wLjI3NywwLjIxNS0wLjQyMywwLjMxM2MtMC4wNDksMC4wMzMtMC4xMDEsMC4wNi0wLjE1MSwwLjA5MWMtMC4xNTcsMC4xMDEtMC4zMTUsMC4xOTktMC40OCwwLjI4OCAgIGMtMC4wMzcsMC4wMi0wLjA3NSwwLjAzNS0wLjExMiwwLjA1NGMtMC4xODEsMC4wOTMtMC4zNjMsMC4xODItMC41NTIsMC4yNjFjLTAuMDI2LDAuMDExLTAuMDU0LDAuMDE5LTAuMDgxLDAuMDI5ICAgYy0wLjIsMC4wOC0wLjQwMiwwLjE1NS0wLjYwOSwwLjIxOGMtMC4wMjYsMC4wMDgtMC4wNTQsMC4wMTMtMC4wOCwwLjAyMWMtMC4yMDcsMC4wNjEtMC40MTYsMC4xMTYtMC42MywwLjE1OCAgIGMtMC4wNTksMC4wMTItMC4xMTksMC4wMTctMC4xNzgsMC4wMjdjLTAuMTgyLDAuMDMyLTAuMzYzLDAuMDYzLTAuNTQ5LDAuMDgyYy0wLjI0OCwwLjAyNS0wLjQ5OCwwLjAzOC0wLjc0OSwwLjAzOCAgIHMtMC41MDEtMC4wMTMtMC43NDktMC4wMzhjLTAuMTg2LTAuMDE5LTAuMzY4LTAuMDUtMC41NDktMC4wODJjLTAuMDU5LTAuMDEtMC4xMTktMC4wMTYtMC4xNzgtMC4wMjcgICBjLTAuMjE0LTAuMDQyLTAuNDIzLTAuMDk4LTAuNjMtMC4xNThjLTAuMDI2LTAuMDA4LTAuMDU0LTAuMDEzLTAuMDgtMC4wMjFjLTAuMjA4LTAuMDYzLTAuNDEtMC4xMzgtMC42MDktMC4yMTggICBjLTAuMDI3LTAuMDExLTAuMDU0LTAuMDE5LTAuMDgxLTAuMDI5Yy0wLjE4OS0wLjA3OS0wLjM3MS0wLjE2OC0wLjU1Mi0wLjI2MWMtMC4wMzctMC4wMTktMC4wNzYtMC4wMzUtMC4xMTItMC4wNTQgICBjLTAuMTY1LTAuMDg4LTAuMzIzLTAuMTg3LTAuNDgtMC4yODhjLTAuMDUtMC4wMzEtMC4xMDItMC4wNTktMC4xNTEtMC4wOTFjLTAuMTQ2LTAuMDk4LTAuMjg1LTAuMjA2LTAuNDIzLTAuMzEzICAgYy0wLjA1NS0wLjA0My0wLjExMy0wLjA4MS0wLjE2Ny0wLjEyNWMtMC4xNjktMC4xMzktMC4zMy0wLjI4Ny0wLjQ4Ni0wLjQ0Yy0wLjAxOC0wLjAxOC0wLjAzOS0wLjAzMy0wLjA1Ny0wLjA1MWwtODguMzU2LTg4LjM1NyAgIEM5Ny4zMjYsMzQ5Ljg2NCw2Ny42MDcsMzk4Ljk0OSw2NS4xNjMsNDU1SDEwNy41YzQuMTQyLDAsNy41LDMuMzU3LDcuNSw3LjVoMTVDMTMwLDQ1OC4zNTcsMTMzLjM1OCw0NTUsMTM3LjUsNDU1eiIvPgoJPHBhdGggc3R5bGU9ImZpbGw6IzA4Mjk0NzsiIGQ9Ik0zNTMuNzUsMzIwLjc2M2MtNi43MTEtNS42MzItMTMuODI2LTEwLjc5NS0yMS4yOTUtMTUuNDQzYy0wLjUyNy0wLjQzOS0xLjEwMi0wLjc4OS0xLjcwNC0xLjA2MSAgIEMzMDIuODAxLDI4Ny4yODMsMjcwLjAyMiwyNzcuNSwyMzUsMjc3LjVzLTY3LjgwMSw5Ljc4My05NS43NTEsMjYuNzU4Yy0wLjYwMiwwLjI3Mi0xLjE3NywwLjYyMi0xLjcwNCwxLjA2MSAgIGMtNy40NjksNC42NDgtMTQuNTg0LDkuODExLTIxLjI5NSwxNS40NDNDNzUuNzc4LDM1NC43MjYsNTAsNDA1LjY1NSw1MCw0NjIuNWMwLDQuMTQzLDMuMzU4LDcuNSw3LjUsNy41aDUwICAgYzQuMTQyLDAsNy41LTMuMzU3LDcuNS03LjVzLTMuMzU4LTcuNS03LjUtNy41SDY1LjE2M2MyLjQ0NC01Ni4wNTEsMzIuMTYzLTEwNS4xMzYsNzYuMTc3LTEzNC4zMDNsODguMzU2LDg4LjM1NyAgIGMwLjAxOCwwLjAxOCwwLjAzOCwwLjAzMywwLjA1NywwLjA1MWMwLjE1NiwwLjE1MywwLjMxNywwLjMwMSwwLjQ4NiwwLjQ0YzAuMDU0LDAuMDQ0LDAuMTEyLDAuMDgyLDAuMTY3LDAuMTI1ICAgYzAuMTM5LDAuMTA3LDAuMjc3LDAuMjE1LDAuNDIzLDAuMzEzYzAuMDQ5LDAuMDMzLDAuMTAxLDAuMDYsMC4xNTEsMC4wOTFjMC4xNTcsMC4xMDEsMC4zMTUsMC4xOTksMC40OCwwLjI4OCAgIGMwLjAzNywwLjAyLDAuMDc1LDAuMDM1LDAuMTEyLDAuMDU0YzAuMTgxLDAuMDkzLDAuMzYzLDAuMTgyLDAuNTUyLDAuMjYxYzAuMDI2LDAuMDExLDAuMDU0LDAuMDE5LDAuMDgxLDAuMDI5ICAgYzAuMiwwLjA4LDAuNDAyLDAuMTU1LDAuNjA5LDAuMjE4YzAuMDI2LDAuMDA4LDAuMDU0LDAuMDEzLDAuMDgsMC4wMjFjMC4yMDcsMC4wNjEsMC40MTYsMC4xMTYsMC42MywwLjE1OCAgIGMwLjA1OSwwLjAxMiwwLjExOSwwLjAxNywwLjE3OCwwLjAyN2MwLjE4MiwwLjAzMiwwLjM2MywwLjA2MywwLjU0OSwwLjA4MmMwLjI0OCwwLjAyNSwwLjQ5OCwwLjAzOCwwLjc0OSwwLjAzOCAgIHMwLjUwMS0wLjAxMywwLjc0OS0wLjAzOGMwLjE4Ni0wLjAxOSwwLjM2OC0wLjA1LDAuNTQ5LTAuMDgyYzAuMDU5LTAuMDEsMC4xMTktMC4wMTYsMC4xNzgtMC4wMjcgICBjMC4yMTQtMC4wNDIsMC40MjMtMC4wOTgsMC42My0wLjE1OGMwLjAyNi0wLjAwOCwwLjA1NC0wLjAxMywwLjA4LTAuMDIxYzAuMjA4LTAuMDYzLDAuNDEtMC4xMzgsMC42MDktMC4yMTggICBjMC4wMjctMC4wMTEsMC4wNTQtMC4wMTksMC4wODEtMC4wMjljMC4xODktMC4wNzksMC4zNzEtMC4xNjgsMC41NTItMC4yNjFjMC4wMzctMC4wMTksMC4wNzYtMC4wMzUsMC4xMTItMC4wNTQgICBjMC4xNjUtMC4wODgsMC4zMjMtMC4xODcsMC40OC0wLjI4OGMwLjA1LTAuMDMxLDAuMTAyLTAuMDU5LDAuMTUxLTAuMDkxYzAuMTQ2LTAuMDk4LDAuMjg1LTAuMjA2LDAuNDIzLTAuMzEzICAgYzAuMDU1LTAuMDQzLDAuMTEzLTAuMDgxLDAuMTY3LTAuMTI1YzAuMTY5LTAuMTM5LDAuMzMtMC4yODcsMC40ODYtMC40NGMwLjAxOC0wLjAxOCwwLjAzOS0wLjAzMywwLjA1Ny0wLjA1MWw4OC4zNTYtODguMzU3ICAgYzQ0LjAxNCwyOS4xNjcsNzMuNzMzLDc4LjI1Miw3Ni4xNzcsMTM0LjMwM0gxMzcuNWMtNC4xNDIsMC03LjUsMy4zNTctNy41LDcuNXMzLjM1OCw3LjUsNy41LDcuNWgyNzVjNC4xNDIsMCw3LjUtMy4zNTcsNy41LTcuNSAgIEM0MjAsNDA1LjY1NSwzOTQuMjIyLDM1NC43MjYsMzUzLjc1LDMyMC43NjN6IE0yMzUsMzM3LjVjLTQuMTQyLDAtNy41LDMuMzU3LTcuNSw3LjV2NDAuNjQ0bC03Mi44OTMtNzIuODk0ICAgYzIxLjg4LTExLjc5Myw0Ni42Mi0xOC45MzEsNzIuODkzLTIwLjA3N1YzMTVjMCw0LjE0MywzLjM1OCw3LjUsNy41LDcuNXM3LjUtMy4zNTcsNy41LTcuNXYtMjIuMzI3ICAgYzI2LjI3MiwxLjE0Niw1MS4wMTMsOC4yODQsNzIuODkzLDIwLjA3N0wyNDIuNSwzODUuNjQ0VjM0NUMyNDIuNSwzNDAuODU3LDIzOS4xNDIsMzM3LjUsMjM1LDMzNy41eiIvPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+Cjwvc3ZnPgo=" transform="rotate(0,16,32)"></image></svg>';
+
+    var schoolIcon = new H.map.Icon(svgMarkup),
+        coords = { lat: 25.03653, lng: 121.57241 },
+        schoolMarker = new H.map.Marker(
+            coords, { icon: schoolIcon });
+    map.addObject(schoolMarker);
+
+    //add svg Icon for folder source
+    var schoolIcon = new H.map.Icon('ferris-wheel.png'),
+        coords = { lat: 25.03745, lng: 121.56603 },
+        schoolMarker = new H.map.Marker(
+            coords, { icon: schoolIcon });
+    map.addObject(schoolMarker);
+	
+	
+	    //add svg Icon for folder source
+    var parkIcon = new H.map.Icon('placeholder.png'),
+        coords = { lat: 25.03745, lng: 121.56603 },
+        parkMarker = new H.map.Marker(
+            coords, { icon: parkIcon });
+    map.addObject(parkMarker);
+    /*
+    //刪除 marker
+    map.removeObject(hereTaipeiMarker);
+    */
+
+    //設定地圖中心點
+    map.setCenter({ lat: 25.03689, lng: 121.56848 });
+
+
+    /*
+    //Add Spatials. 面圖標
+    Polylines (H.map.Polyline
+    Polygons (H.map.Polygon)
+    Circles (H.map.Circle)
+    Rectangles (H.map.Rect).
+    */
+
+    //.Circle() 圓形
+
+    /*
+    可設定不同的呈現方式
+    strokeColor : The color of a shapes outline
+    lineWidth :   The width of the outline in pixels
+    fillColor :   The color with which a shape's area will be filled (ignored for polylines)
+    lineCap :     The rendering style of outline endings
+    lineJoin :    The rendering style for vertices within the outline
+    */
+
+
+    </script>
+</body>
+
+</html>
